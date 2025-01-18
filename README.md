@@ -2,12 +2,6 @@
 
 ## Project Overview
 
-Berikut adalah draft bagian **Project Overview** untuk README.md Anda:  
-
----
-
-## Project Overview
-
 Di era modern ini, teknologi informasi memainkan peran penting dalam berbagai aspek kehidupan, termasuk bidang kesehatan. Salah satu tantangan yang sering dihadapi oleh masyarakat adalah kesulitan dalam menentukan obat yang sesuai dengan gejala yang dirasakan tanpa harus berkonsultasi langsung dengan tenaga medis. Proses ini tidak hanya memakan waktu tetapi juga dapat meningkatkan risiko kesalahan dalam memilih obat yang dapat memperburuk kondisi pasien.
 
 Sistem rekomendasi obat berbasis gejala hadir sebagai solusi untuk masalah ini. Sistem ini memanfaatkan algoritma pembelajaran mesin untuk menganalisis data gejala yang dimasukkan oleh pengguna dan memberikan rekomendasi obat yang sesuai. Dengan demikian, sistem ini dapat membantu masyarakat mendapatkan informasi yang lebih cepat, akurat, dan relevan terkait obat-obatan yang mereka butuhkan.  
@@ -57,8 +51,22 @@ Pendekatan ini dipilih karena kemampuannya untuk menghasilkan rekomendasi yang s
 
 ## Data Understanding  
 
-Dataset yang digunakan dalam proyek ini berjudul **Medical Reccomandation dataSet**, yang berasal dari Kaggle Dataset dan dapat diakses melalui tautan berikut: [Medical Reccomandation dataSet](https://www.kaggle.com/datasets/joymarhew/medical-reccomadation-dataset). Dataset ini berisi informasi mengenai gejala, penyebab, penyakit, dan obat-obatan yang relevan.  
- 
+Dataset yang digunakan dalam proyek ini berjudul **Medical Reccomandation dataSet**, yang berasal dari Kaggle Dataset dan dapat diakses melalui tautan berikut: [Medical Reccomandation dataSet](https://www.kaggle.com/datasets/joymarhew/medical-reccomadation-dataset). Dataset ini terdiri dari **287 baris data** dan **7 kolom**. Dataset ini berisi informasi mengenai gejala, penyebab, penyakit, dan obat-obatan yang relevan.
+
+### Atribut Lengkap Dataset
+Berikut adalah deskripsi lengkap dari setiap atribut dalam dataset:  
+
+| Atribut      | Tipe Data     | Deskripsi                                                                 |  
+|--------------|---------------|---------------------------------------------------------------------------|  
+| `Name`         | String        | Nama pasien.                     |  
+| `DateOfBirth`  | Date          | Tanggal lahir pasien.            |  
+| `Gender`       | Categorical   | Jenis kelamin pasien (Male, Female).                                     |  
+| `Symptoms`     | String        | Deskripsi gejala yang dirasakan pasien.                                  |  
+| `Causes`       | String        | Penyebab gejala yang dirasakan pasien.                                   |  
+| `Disease`      | String        | Penyakit yang mungkin terkait dengan gejala.                             |  
+| `Medicine`     | String        | Obat atau tidakan yang direkomendasikan untuk mengatasi gejala atau penyakit terkait. |
+
+### Missing Values dan Duplikasi Data
 Dataset ini **memiliki beberapa nilai yang hilang** pada beberapa kolom, seperti yang ditunjukkan pada tabel berikut:  
 
 | Kolom         | Missing Values |  
@@ -79,20 +87,7 @@ Selain itu, **terdapat 84 baris data duplikat** dalam dataset. Contoh data dupli
 ![Data Duplikat](https://i.ibb.co.com/b2xNKkH/data-duplikat.png)
 Berdasarkan tabel, data duplikat tidak sama persis di setiap atributnya dan terdapat kesamaan pada beberapa atribut saja, misal `Name` dan `DateOfBirth`. Jika dianalisis, adalah hal yang wajar jika seseorang mengalami beberapa kali riwayat gejala sakit dan obat yang diminumnya sehingga data seperti ini tetap dipertahankan.
 
-### Atribut Lengkap Dataset  
-Berikut adalah deskripsi lengkap dari setiap atribut dalam dataset:  
-
-| Atribut      | Tipe Data     | Deskripsi                                                                 |  
-|--------------|---------------|---------------------------------------------------------------------------|  
-| `Name`         | String        | Nama pasien.                     |  
-| `DateOfBirth`  | Date          | Tanggal lahir pasien.            |  
-| `Gender`       | Categorical   | Jenis kelamin pasien (Male, Female).                                     |  
-| `Symptoms`     | String        | Deskripsi gejala yang dirasakan pasien.                                  |  
-| `Causes`       | String        | Penyebab gejala yang dirasakan pasien.                                   |  
-| `Disease`      | String        | Penyakit yang mungkin terkait dengan gejala.                             |  
-| `Medicine`     | String        | Obat atau tidakan yang direkomendasikan untuk mengatasi gejala atau penyakit terkait. | 
-
-### Fixed Broken Data
+### Broken Data
 Terdapat beberapa data yang invalid, seperti adanya pemenggalan kalimat yang tidak sesuai, seperti yang ditunjukkan pada tabel berikut.
 ![Broken Data](https://i.ibb.co.com/rdMh4WH/broken-data.png)
 Olehnya itu terlebih dahulu dilakukan perbaikan untuk data seperti ini agar kualias data yang digunakan lebih baik.
@@ -107,35 +102,29 @@ Dilakukan tahapan untuk analisis tiap atribut secara individu, menampilkan top 1
 
 Pada tahap ini dilakukan persiapan data sebelum masuk ke pemodelan. Adapun tahapan yang dilakukan adalah sebagai berikut.
 
-1. Merubah format data menjadi huruf kecil (lower case). Hal ini dilakukan agar data lebih mudah diproses oleh model dan agar model tidak case sensitive.
-2. Memilih fitur yang digunakan dalam model dengan menggabungkan beberapa atribut yaitu `Symptoms`, `Causes`, dan `Disease`. Atribut yang digunakan sebagai target adalah `Medicine`. Adapun fitur lain tidak digunakan karena tidak relevan dengan metode yang akan digunakan yaitu content based filtering. 
-3. Menghilangkan karakter yang tidak diperlukan pada atribut fitur seperti dan koma (,) agar lebih muda diproses oleh model.
+1. Memperbaiki broken data. Hal ini dilakukan dengan filter data yang tidak sesuai seperti kesalahan pemenggalan kata kemudian menggantinya dengan kata yang sesuai.
+2. Menghapus null data. Hal ini dilakukan karena data null yang ada tidak memungkinkan untuk diperbaiki karena hampir setiap kolomnya berisi null value.
+3. Merubah format data menjadi huruf kecil (lower case). Hal ini dilakukan agar data lebih mudah diproses oleh model dan agar model tidak case sensitive.
+4. Memilih fitur yang digunakan dalam model dengan menggabungkan beberapa atribut yaitu `Symptoms`, `Causes`, dan `Disease` ke fitur baru bernama `combined_features` yang menjadi dasar analisis. Atribut yang digunakan sebagai target adalah `Medicine`. Adapun fitur lain tidak digunakan karena tidak relevan dengan metode yang akan digunakan yaitu content based filtering. 
+5. Menghilangkan karakter yang tidak diperlukan pada atribut fitur seperti dan koma (,) agar lebih muda diproses oleh model.
+6. Menggunakan TF-IDF Vectorization. Algortima ini digunakan untuk merepresentasikan `combined_features` sebagai vektor numerik. Setiap kata dalam teks diberi bobot berdasarkan *Term Frequency (TF)* (Seberapa sering kata tersebut muncul dalam fitur gabungan) dan *Inverse Document Frequency (IDF)* (Seberapa unik kata tersebut di seluruh dataset). Hasilnya adalah matriks TF-IDF, di mana setiap baris merepresentasikan sebuah obat, dan setiap kolom adalah bobot kata yang relevan.
 
 
 ## Modeling  
 
-Sistem rekomendasi yang dibangun menggunakan pendekatan *item-based filtering* dan algoritma TF-IDF Vectorizer untuk menganalisis kemiripan antar obat berdasarkan deskripsi fitur gabungan (*combined features*). Berikut adalah penjelasan langkah-langkahnya:  
+Sistem rekomendasi yang dibangun menggunakan pendekatan *item-based filtering* dengan menggunakan cosine similarity untuk menganalisis kemiripan antar obat berdasarkan vector tf-idf dari fitur gabungan (*combined features*). 
+Pendekatan *item-based filtering* digunakan untuk menganalisis kemiripan antar item (dalam hal ini obat) dengan *cosine similarity* berdasarkan fitur deskriptif. Penggunaan teknik ini memungkinkan sistem untuk memahami hubungan antar obat dengan cara berikut:    
 
-### Item-Based Filtering dengan TF-IDF  
-
-Pendekatan *item-based filtering* digunakan untuk menganalisis kemiripan antar item (dalam hal ini obat) berdasarkan fitur deskriptif. Kombinasi teknik ini dengan TF-IDF memungkinkan sistem untuk memahami hubungan antar obat dengan cara berikut:  
-
-1. **Menggabungkan Fitur**:  
-   Dataset berisi informasi seperti gejala (*Symptoms*), penyebab (*Causes*), dan penyakit (*Disease*). Semua informasi ini digabungkan menjadi satu fitur teks bernama `combined_features`, yang menjadi dasar analisis.  
-
-2. **TF-IDF Vectorization**:  
-   Algoritma TF-IDF Vectorizer digunakan untuk merepresentasikan `combined_features` sebagai vektor numerik. Setiap kata dalam teks diberi bobot berdasarkan:  
-   - *Term Frequency (TF)*: Seberapa sering kata tersebut muncul dalam fitur gabungan.  
-   - *Inverse Document Frequency (IDF)*: Seberapa unik kata tersebut di seluruh dataset.  
-
-   Hasilnya adalah matriks TF-IDF, di mana setiap baris merepresentasikan sebuah obat, dan setiap kolom adalah bobot kata yang relevan.  
-
-3. **Penghitungan Kemiripan**:  
+1. **Penghitungan Kemiripan**:  
    Setelah fitur teks diubah menjadi matriks TF-IDF, metrik *cosine similarity* digunakan untuk menghitung kemiripan antar obat. Hasilnya adalah matriks kemiripan (*similarity matrix*) yang menunjukkan tingkat hubungan antara setiap pasangan obat.  
 
-4. **Rekomendasi Berdasarkan Kemiripan**:  
+2. **Rekomendasi Berdasarkan Kemiripan Obat**:  
    - Untuk setiap obat yang dicari, sistem memeriksa baris dalam matriks kemiripan yang sesuai dengan obat tersebut.  
    - Obat-obatan dengan skor kemiripan tertinggi dipilih sebagai rekomendasi.  
+
+3. **Rekomendasi Berdasarkan Gejala yang Dirasakan**
+   - Mencari obat yang sesuai berdasarkan gejala yang dirasakan dan menjadikannya reference medicine.
+   - Reference medicine digunakan untuk menghasilkan top-n rekomendasi berdasarkan kemiripan obat tersebut menggunakan matriks kemiripan yang dibuat sebelumnya.
 
 ### Kelebihan dan Kekurangan  
 
@@ -162,9 +151,6 @@ beta-blockers         0.631797
 relaxation, nsaids    0.261742
 Name: sumatriptan, dtype: float64
 ```
-Berikut adalah draft bagian **Evaluation** untuk README.md Anda:  
-
----
 
 ## Evaluation  
 

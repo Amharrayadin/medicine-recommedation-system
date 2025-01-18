@@ -24,14 +24,23 @@ import kagglehub
 
 path = kagglehub.dataset_download("joymarhew/medical-reccomadation-dataset")
 
+"""Download dataset from Kaggle and get the path."""
+
 data = pd.read_csv(f"{path}/medical data.csv")
 data.head(10)
 
-"""# Exploratory Data Analysis"""
+"""Load the dataset and show the 10 first data.
+
+# Exploratory Data Analysis
+"""
 
 data.info()
 
+"""Show information about the data like the column names, non null count, and data type."""
+
 data.isnull().sum()
+
+"""Show num of null data of each column"""
 
 data[data.isnull().any(axis=1)]
 
@@ -40,7 +49,11 @@ data[data.isnull().any(axis=1)]
 data = data.dropna()
 data.shape
 
+"""Dropped the null data and show the data shape."""
+
 data.duplicated().sum()
+
+"""There are 84 duplicated data"""
 
 data[data.duplicated(subset=['Name', 'DateOfBirth'])].sort_values(by=['Name', 'DateOfBirth'])
 
@@ -60,7 +73,11 @@ def starts_with_lowercase(row):
 lowercase_rows = data[data.apply(starts_with_lowercase, axis=1)]
 lowercase_rows
 
+"""The row that cointais the broken data has the pattern that one of the column started with lower case, so we collect all of its and display the data."""
+
 data['Symptoms'] = data['Symptoms'].str.replace(r'^e\s+', '', regex=True)
+
+"""Remove the Symptoms columns that start with "e " because it trimmed from female (female -> femal)"""
 
 replace_dict = {
     "Femal": "Female",
@@ -96,6 +113,8 @@ replace_dict = {
 
 data.replace(replace_dict, inplace=True)
 
+"""Make replace dictionary to fix the broken data then replace it to the dataframe."""
+
 # recheck the data
 lowercase_rows = data[data.apply(starts_with_lowercase, axis=1)]
 lowercase_rows.shape
@@ -107,6 +126,8 @@ lowercase_rows.shape
 
 data['DateOfBirth'] = pd.to_datetime(data['DateOfBirth'])
 
+"""Changes the datatype of DateOfBrith ti datetime"""
+
 plt.figure(figsize=(10, 6))
 plt.hist(data['DateOfBirth'].dt.year, bins=20, color='skyblue', edgecolor='black')
 plt.xlabel('Year of Birth')
@@ -115,11 +136,15 @@ plt.title('Distribution of Patient Birth Years')
 plt.grid(axis='y', alpha=0.75)
 plt.show()
 
+"""The data distribution of Year of Birth start from 1972 to 2005. Because the data collect in 2023, we know that all of patient are an adult (17+)"""
+
 data['Gender'].value_counts().plot(kind='bar', color='skyblue')
 plt.xlabel('Gender')
 plt.ylabel('Number of Patients')
 plt.title('Distribution of Patient Gender')
 plt
+
+"""The distribution of gender relatively same for male and famale"""
 
 fig, axes = plt.subplots(2, 2, figsize=(15, 10))
 fig.suptitle("Top 10 Symptoms, Causes, Diseases, and Medicines", fontsize=16)
@@ -138,7 +163,10 @@ for i, feature in enumerate(features):
 plt.tight_layout(rect=[0, 0.03, 1, 0.95])
 plt.show()
 
-"""# Data Preprocessing"""
+"""Display the top 10 of each column. We can know that some symptoms, causes, disease and madicine show more than 10 times.
+
+# Data Preprocessing
+"""
 
 data['Gender'] = data['Gender'].str.lower()
 data['Symptoms'] = data['Symptoms'].str.lower()
@@ -146,21 +174,27 @@ data['Causes'] = data['Causes'].str.lower()
 data['Disease'] = data['Disease'].str.lower()
 data['Medicine'] = data['Medicine'].str.lower()
 
+"""Convert the data to lower case to make the model learn easyly"""
+
 data['combined_features'] = data['Symptoms'] + ' ' + data['Causes'] + ' ' + data['Disease']
 data['combined_features'] = data['combined_features'].apply(lambda x:x.replace(',',' '))
 
+"""We combine the features so that we can used to the next procces when make the TF-IDF later. We also removed the unused character like comma."""
+
 data
 
-"""# Content based filtering
+"""## TF-IDF Vectorizer"""
 
-## TF IFD Vectorizer
+tfidf = TfidfVectorizer(stop_words='english')
+tfidf_matrix = tfidf.fit_transform(data['combined_features'])
+
+"""Make the TF-IDF matrix to represent the features as a numeric vector. Every word is given weight by term frequency and inverse document frequency
+
+# Content based filtering
 """
 
-def create_medicine_recommender(data):
+def create_medicine_recommender(data=data, tfidf_matrix=tfidf_matrix):
     try:
-        tfidf = TfidfVectorizer(stop_words='english')
-        tfidf_matrix = tfidf.fit_transform(data['combined_features'])
-
         medicine_similarity = cosine_similarity(tfidf_matrix, tfidf_matrix)
 
         medicine_similarity_df = pd.DataFrame(
@@ -169,11 +203,13 @@ def create_medicine_recommender(data):
             columns=data['Medicine']
         )
 
-        return tfidf, medicine_similarity_df
+        return medicine_similarity_df
 
     except Exception as e:
         print(f"Error when try to create medicine recommender: {str(e)}")
         return None, None
+
+"""create a medicine recommender system using cosine similarity based on the TF-IDF matrix of the combined features (symptoms, causes, and disease) of the medical data. This function return medicine similarity as dataframe to used to the next step when match the madicine"""
 
 def get_medicine_recommendations(medicine_name, similarity_df, n_recommendations=3):
     try:
@@ -194,9 +230,11 @@ def get_medicine_recommendations(medicine_name, similarity_df, n_recommendations
     except Exception as e:
         return f"Error when try to get recommendation: {str(e)}"
 
+"""in this function we get the madicine recommedation based on the similarity of the madicine that we input with the other madicine by the similarity df that we build from previous function. It's return top-n recommedation that is 3 by default"""
+
 def get_recommendations_by_symptoms(symptoms, df=data):
 
-    tfidf, similarity_df = create_medicine_recommender(df)
+    similarity_df = create_medicine_recommender()
 
     matching_rows = df[df['Symptoms'].str.contains(symptoms, case=False)]
 
@@ -211,10 +249,15 @@ def get_recommendations_by_symptoms(symptoms, df=data):
     except KeyError:
         return f"Medicine '{reference_medicine}' not found in the similarity matrix."
 
+"""this function is used to get the medicine by the symptoms. First, we find the madicine that have used for this symptom. After that we use madicine recommedation funtion berfore to get the madicine recommedation based on the madicine reference."""
+
 recommendations = get_recommendations_by_symptoms('fatigue')
 print(recommendations)
 
-"""# Evaluation"""
+"""The code run seccesfully and can shoe the top 3 recommendation.
+
+# Evaluation
+"""
 
 def evaluate_recommendation_system(test_data, similarity_df, k=3):
     recall_scores = []
@@ -250,8 +293,17 @@ def evaluate_recommendation_system(test_data, similarity_df, k=3):
         "MRR": mrr.round(2)
     }
 
+"""this function evaluates the performance of a medicine recommendation system using Recall@k and Mean Reciprocal Rank (MRR). It iterates through test data, gets recommendations for symptoms, and compares them to the true medicine. By calculating the average recall and reciprocal rank, it provides metrics to assess the accuracy and ranking quality of the recommendations."""
+
 test_data = data.sample(15, random_state=28)
-tfidf, similarity_df = create_medicine_recommender(data)
+similarity_df = create_medicine_recommender()
 
 results = evaluate_recommendation_system(test_data, similarity_df)
 print("Evaluation Results:", results)
+
+"""we make the test data by randomly take the sample af the data and evaluate using previuos function. As the result we get Evaluation Results:
+
+**Recall@k: 0.87**
+
+**MRR: 0.73**
+"""
