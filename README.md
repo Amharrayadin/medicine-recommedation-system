@@ -8,8 +8,6 @@ Sistem rekomendasi obat berbasis gejala hadir sebagai solusi untuk masalah ini. 
 
 Proyek ini menjadi penting untuk diselesaikan karena dapat meningkatkan aksesibilitas informasi medis, terutama bagi masyarakat di daerah terpencil yang sulit mendapatkan konsultasi langsung dari dokter. Selain itu, sistem ini dapat berkontribusi dalam mengurangi beban kerja tenaga medis dengan menyediakan rekomendasi awal yang dapat menjadi acuan sebelum konsultasi lebih lanjut.  
 
-Sebuah studi yang dilakukan oleh [A. Sarker dan C. Gonzalez (2017)](https://doi.org/10.1016/j.jbi.2017.02.003) menunjukkan bahwa pemanfaatan teknologi berbasis data dalam analisis gejala dan pengobatan memiliki potensi besar dalam meningkatkan efisiensi layanan kesehatan. Penelitian lain oleh [M. Paul dan M. Dredze (2011)](https://dl.acm.org/doi/10.1145/2020408.2020422) menggarisbawahi bahwa data yang diolah dengan teknik machine learning dapat memberikan wawasan berharga untuk mendukung pengambilan keputusan di bidang kesehatan.
-
 Dengan latar belakang ini, proyek sistem rekomendasi obat berdasarkan gejala yang dirasakan tidak hanya menawarkan solusi praktis tetapi juga berkontribusi dalam memajukan layanan kesehatan berbasis teknologi di Indonesia.
 
 ## Business Understanding  
